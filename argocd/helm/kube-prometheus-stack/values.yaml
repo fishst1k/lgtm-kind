@@ -1,0 +1,97 @@
+kube-prometheus-stack:
+  ## Install Prometheus Operator CRDs
+  ##
+  crds:
+    enabled: true
+
+
+  ## Create default rules for monitoring the cluster
+  ##
+  defaultRules:
+    create: true
+    rules:
+      alertmanager: false
+      etcd: false
+      configReloaders: true
+      general: true
+      k8s: true
+      kubeApiserverAvailability: true
+      kubeApiserverBurnrate: true
+      kubeApiserverHistogram: true
+      kubeApiserverSlos: true
+      kubeControllerManager: true
+      kubelet: true
+      kubeProxy: true
+      kubePrometheusGeneral: true
+      kubePrometheusNodeRecording: true
+      kubernetesApps: true
+      kubernetesResources: true
+      kubernetesStorage: true
+      kubernetesSystem: true
+      kubeSchedulerAlerting: true
+      kubeSchedulerRecording: true
+      kubeStateMetrics: true
+      network: true
+      node: true
+      nodeExporterAlerting: true
+      nodeExporterRecording: true
+      prometheus: true
+      prometheusOperator: true
+      windows: false
+    labels:
+      grafana_alert: "1"
+
+  ## Configuration for alertmanager
+  ## ref: https://prometheus.io/docs/alerting/alertmanager/
+  ##
+  alertmanager:
+    enabled: false
+
+  ## Using default values from https://github.com/grafana/helm-charts/blob/main/charts/grafana/values.yaml
+  ##
+  grafana:
+    enabled: true
+    adminPassword: admin
+
+    sidecar:
+      dashboards:
+        enabled: true
+        searchNamespace: ALL
+      alerts:
+        enabled: true
+        searchNamespace: ALL
+      datasources:
+        enabled: true
+        defaultDatasourceEnabled: true
+        isDefaultDatasource: false
+
+    datasources:
+      datasources.yaml:
+        apiVersion: 1
+        datasources:
+          - name: Mimir
+            type: prometheus
+            url: http://mimir-gateway.mimir.svc.cluster.local:8080/prometheus
+            editable: true
+            isDefault: true
+            orgId: 1
+            jsonData:
+              httpHeaderName1: "X-Scope-OrgID"
+            secureJsonData:
+              httpHeaderValue1: "lgtm-kind"
+
+  ## Deploy a Prometheus instance
+  ##
+  prometheus:
+    enabled: true
+
+    prometheusSpec:
+      ## The remote_write spec configuration for Prometheus.
+      ## ref: https://github.com/prometheus-operator/prometheus-operator/blob/main/Documentation/api.md#remotewritespec
+      remoteWrite:
+        - url: http://mimir-gateway.mimir.svc.cluster.local:8080/api/v1/push
+          headers:
+            "X-Scope-OrgID": "lgtm-kind"
+
+  kubeProxy:
+    enabled: false
