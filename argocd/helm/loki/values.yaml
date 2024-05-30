@@ -29,6 +29,8 @@ loki:
   #          - path: /
   #            pathType: Prefix
 
+  chunksCache:
+    allocatedMemory: 1025
   deploymentMode: SingleBinary
   singleBinary:
     replicas: 1
