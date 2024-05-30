@@ -71,7 +71,7 @@ mimir-distributed:
         grafana_alert: "1"
       # -- prometheusRule namespace. This should be the namespace where the Prometheus Operator is installed,
       # unless the Prometheus Operator is set up to look for rules outside its namespace
-      namespace: kube-prometheus-stack
+      namespace: grafana
       # -- Contents of Prometheus rules file
       groups:
         - name: mimir_api_1
