@@ -10,7 +10,7 @@ spec:
   project: default
   source:
     repoURL: https://github.com/fishst1k/lgtm-kind.git
-    targetRevision: main
+    targetRevision: master
     path: argocd/helm/loki
     helm:
       valueFiles:
