@@ -53,7 +53,7 @@ tempo:
       {{- end }}
 
   tempoQuery:
-    enabled: false
+    enabled: true
 
   # -- securityContext for container
   securityContext: {}
