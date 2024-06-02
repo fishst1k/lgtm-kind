@@ -71,12 +71,72 @@ kube-prometheus-stack:
         datasources:
           - name: Mimir
             type: prometheus
+            uid: lgtm-mimir
             url: http://mimir-gateway.mimir.svc.cluster.local:8080/prometheus
             editable: true
             isDefault: true
             orgId: 1
             jsonData:
               httpHeaderName1: "X-Scope-OrgID"
+            secureJsonData:
+              httpHeaderValue1: "lgtm-kind"
+          - name: Loki
+            type: loki
+            uid: lgtm-loki
+            url: http://loki-gateway.loki.svc.cluster.local
+            editable: true
+            orgId: 1
+            jsonData:
+              httpHeaderName1: "X-Scope-OrgId"
+            secureJsonData:
+              httpHeaderValue1: "lgtm-kind"
+          - name: Tempo
+            type: tempo
+            url: http://tempo.tempo.svc.cluster.local:4318
+            editable: true
+            orgId: 1
+            uid: lgtm-tempo
+            jsonData:
+              httpHeaderName1: X-Scope-OrgId
+              tracesToLogsV2:
+                datasourceUid: "lgtm-loki"
+                spanStartTimeShift: 1h
+                spanEndTimeShift: -1h
+                tags:
+                  - job
+                  - instance
+                  - pod
+                  - namespace
+                filterByTraceID: 'False'
+                filterBySpanID: 'False'
+                customQuery: 'True'
+                query: method='${__span.tags.method}'
+              tracesToMetrics:
+                datasourceUid: "lgtm-mimir"
+                spanStartTimeShift: 1h
+                spanEndTimeShift: -1h
+                tags:
+                  - key: service.name
+                    value: service
+                  - key: job
+                queries:
+                  - name: Sample query
+                    query: sum(rate(traces_spanmetrics_latency_bucket{$$__tags}[5m]))
+              serviceMap:
+                datasourceUid: ets-mimir
+              nodeGraph:
+                enabled: 'True'
+              search:
+                hide: 'False'
+              lokiSearch:
+                datasourceUid: "lgtm-loki"
+              traceQuery:
+                timeShiftEnabled: 'True'
+                spanStartTimeShift: 1h
+                spanEndTimeShift: -1h
+              spanBar:
+                type: Tag
+                tag: http.path
             secureJsonData:
               httpHeaderValue1: "lgtm-kind"
 
@@ -95,3 +155,4 @@ kube-prometheus-stack:
 
   kubeProxy:
     enabled: false
+
