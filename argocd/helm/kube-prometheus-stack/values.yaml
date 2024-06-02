@@ -143,15 +143,15 @@ kube-prometheus-stack:
   ## Deploy a Prometheus instance
   ##
   prometheus:
-    enabled: true
-
-    prometheusSpec:
-      ## The remote_write spec configuration for Prometheus.
-      ## ref: https://github.com/prometheus-operator/prometheus-operator/blob/main/Documentation/api.md#remotewritespec
-      remoteWrite:
-        - url: http://mimir-gateway.mimir.svc.cluster.local:8080/api/v1/push
-          headers:
-            "X-Scope-OrgID": "lgtm-kind"
+    enabled: false
+#
+#    prometheusSpec:
+#      ## The remote_write spec configuration for Prometheus.
+#      ## ref: https://github.com/prometheus-operator/prometheus-operator/blob/main/Documentation/api.md#remotewritespec
+#      remoteWrite:
+#        - url: http://mimir-gateway.mimir.svc.cluster.local:8080/api/v1/push
+#          headers:
+#            "X-Scope-OrgID": "lgtm-kind"
 
   kubeProxy:
     enabled: false
