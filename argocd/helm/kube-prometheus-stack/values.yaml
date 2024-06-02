@@ -92,7 +92,7 @@ kube-prometheus-stack:
               httpHeaderValue1: "lgtm-kind"
           - name: Tempo
             type: tempo
-            url: http://tempo.tempo.svc.cluster.local:4318
+            url: http://tempo.tempo.svc.cluster.local:16686
             editable: true
             orgId: 1
             uid: lgtm-tempo
