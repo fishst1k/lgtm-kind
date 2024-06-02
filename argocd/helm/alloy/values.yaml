@@ -171,12 +171,12 @@ alloy:
         }
 
         loki.source.kubernetes_events "all" {
-          forward_to = [loki.write.lgtm_kind.receiver]
+          forward_to = [loki.write.lgtm.receiver]
         }
 
         loki.source.kubernetes "pods" {
           targets    = discovery.relabel.pods.output
-          forward_to = [loki.write.lgtm_kind.receiver]
+          forward_to = [loki.write.lgtm.receiver]
           clustering {
             enabled = true
           }
@@ -236,12 +236,12 @@ alloy:
 
         otelcol.exporter.loki "lgtm_kind" {
           // https://grafana.com/docs/agent/latest/flow/reference/components/otelcol.exporter.loki/
-          forward_to = [loki.write.lgtm_kind.receiver]
+          forward_to = [loki.write.lgtm.receiver]
         }
 
         otelcol.exporter.prometheus "lgtm_kind" {
           // https://grafana.com/docs/agent/latest/flow/reference/components/otelcol.exporter.prometheus/
-          forward_to = [prometheus.remote_write.lgtm_kind.receiver]
+          forward_to = [prometheus.remote_write.lgtm.receiver]
         }
 
     # -- Extra ports to expose on the Agent
@@ -284,3 +284,4 @@ alloy:
     enabled: true
   serviceMonitor:
     enabled: true
+
