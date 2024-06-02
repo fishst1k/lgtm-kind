@@ -1,0 +1,21 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: tempo
+  namespace: argocd
+spec:
+  destination:
+    namespace: tempo
+    server: https://kubernetes.default.svc
+  project: default
+  source:
+    repoURL: https://github.com/fishst1k/lgtm-kind.git
+    targetRevision: master
+    path: argocd/helm/tempo
+    helm:
+      valueFiles:
+        - values.yaml
+  syncPolicy:
+    automated: {}
+    syncOptions:
+      - CreateNamespace=true
