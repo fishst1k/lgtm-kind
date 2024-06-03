@@ -123,7 +123,7 @@ kube-prometheus-stack:
                   - name: Sample query
                     query: sum(rate(traces_spanmetrics_latency_bucket{$$__tags}[5m]))
               serviceMap:
-                datasourceUid: ets-mimir
+                datasourceUid: lgtm-mimir
               nodeGraph:
                 enabled: 'True'
               search:
