@@ -12,6 +12,8 @@ spec:
     path: deploy/static/provider/kind
     repoURL: https://github.com/kubernetes/ingress-nginx.git
     targetRevision: main
+    directory:
+      include: 'deploy.yaml'
   syncPolicy:
     automated: {}
     syncOptions:
