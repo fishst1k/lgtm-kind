@@ -45,8 +45,6 @@ beyla:
           - k8s_namespace: "^tempo$"
           - k8s_namespace: "^loki$"
           - k8s_namespace: "^grafana$"
-          - k8s_namespace: "^alloy$"
-          - k8s_namespace: "^kube-system$"
       prometheus_export:
         port: 9090
         path: /metrics
