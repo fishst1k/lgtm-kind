@@ -3,10 +3,10 @@ alloy:
     mode: 'flow'
     resources:
       limits:
-        cpu: .1
+        cpu: .5
         memory: 1024Mi
       requests:
-        cpu: .1
+        cpu: .5
         memory: 1024Mi
     configMap:
       create: true
