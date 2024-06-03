@@ -1,0 +1,60 @@
+beyla:
+  service:
+    enabled: false
+
+  ## More configuration options available at https://grafana.com/docs/beyla/latest/configure/options/
+  ## The below default configuration
+  ## 1. looks for ALL the services in the host
+  ## 2. export metrics as prometheus metrics by default at 9090 port
+  ## 3. enables kubernetes attribute
+  ## Note: The default configuration is used if config.create=true and config.name=""
+  config:
+    # -- set to true, to use the below default configurations
+    create: true
+    ## -- Provide the name of the external configmap containing the beyla configuration.
+    ## To create configmap from configuration file, user can use the below command. Note: The name 'beyla-config.yaml' is important.
+    ## `kubectl create cm --from-file=beyla-config.yaml=<name-of-config-file> -n <namespace>`
+    ## If empty, default configuration below is used.
+    name: ""
+    # -- default value of beyla configuration
+    data:
+      log_level: INFO
+      print_traces: true
+      grafana:
+        otlp:
+          submit: [ "metrics","traces" ]
+      otel_traces_export:
+        sampler:
+          name: parentbased_traceidratio
+          arg: "0.01"
+        insecure_skip_verify: false
+        protocol: grpc
+        endpoint: http://alloy.alloy.svc.cluster.local:4317/v1/traces
+      otel_metrics_export:
+        insecure_skip_verify: false
+        protocol: grpc
+        endpoint: http://alloy.alloy.svc.cluster.local:4317/v1/metrics
+      attributes:
+        kubernetes:
+          enable: true
+      routes:
+        unmatched: heuristic
+      discovery:
+        services:
+          - k8s_namespace: "^mimir$"
+          - k8s_namespace: "^tempo$"
+          - k8s_namespace: "^loki$"
+          - k8s_namespace: "^grafana$"
+          - k8s_namespace: "^alloy$"
+          - k8s_namespace: "^kube-system$"
+      prometheus_export:
+        port: 9090
+        path: /metrics
+
+  # -- Preconfigures some default properties for network or application observability.
+  # Accepted values are "network" or "application".
+  preset: application
+
+  # -- Enable creation of ServiceMonitor for scraping of prometheus HTTP endpoint
+  serviceMonitor:
+    enabled: true
