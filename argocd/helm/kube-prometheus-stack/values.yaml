@@ -82,7 +82,7 @@ kube-prometheus-stack:
               httpHeaderValue1: "lgtm-kind"
           - name: Loki
             type: loki
-            uid: lgtm-loki
+            uid: "lgtm-loki"
             url: http://loki-gateway.loki.svc.cluster.local
             editable: true
             orgId: 1
@@ -95,7 +95,7 @@ kube-prometheus-stack:
             url: http://tempo.tempo.svc.cluster.local:16686
             editable: true
             orgId: 1
-            uid: lgtm-tempo
+            uid: "lgtm-tempo"
             jsonData:
               httpHeaderName1: X-Scope-OrgId
               tracesToLogsV2:
@@ -123,7 +123,7 @@ kube-prometheus-stack:
                   - name: Sample query
                     query: sum(rate(traces_spanmetrics_latency_bucket{$$__tags}[5m]))
               serviceMap:
-                datasourceUid: lgtm-mimir
+                datasourceUid: "lgtm-mimir"
               nodeGraph:
                 enabled: 'True'
               search:
