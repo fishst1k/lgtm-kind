@@ -16,6 +16,13 @@ tempo:
 
   tempo:
     multitenancyEnabled: true
+    resources:
+      requests:
+        cpu: 500m
+        memory: 1Gi
+      limits:
+        cpu: 1000m
+        memory: 2Gi
 
   # -- Tempo configuration file contents
   # @default -- Dynamically generated tempo configmap
