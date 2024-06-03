@@ -1,6 +1,6 @@
 beyla:
   service:
-    enabled: false
+    enabled: true
 
   ## More configuration options available at https://grafana.com/docs/beyla/latest/configure/options/
   ## The below default configuration
@@ -58,3 +58,4 @@ beyla:
   # -- Enable creation of ServiceMonitor for scraping of prometheus HTTP endpoint
   serviceMonitor:
     enabled: true
+
