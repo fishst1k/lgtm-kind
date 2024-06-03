@@ -12,31 +12,31 @@ kube-prometheus-stack:
     rules:
       alertmanager: false
       etcd: false
-      configReloaders: true
+      configReloaders: false
       general: true
       k8s: true
-      kubeApiserverAvailability: true
-      kubeApiserverBurnrate: true
-      kubeApiserverHistogram: true
-      kubeApiserverSlos: true
-      kubeControllerManager: true
-      kubelet: true
-      kubeProxy: true
-      kubePrometheusGeneral: true
-      kubePrometheusNodeRecording: true
-      kubernetesApps: true
-      kubernetesResources: true
-      kubernetesStorage: true
-      kubernetesSystem: true
-      kubeSchedulerAlerting: true
-      kubeSchedulerRecording: true
+      kubeApiserverAvailability: false
+      kubeApiserverBurnrate: false
+      kubeApiserverHistogram: false
+      kubeApiserverSlos: false
+      kubeControllerManager: false
+      kubelet: false
+      kubeProxy: false
+      kubePrometheusGeneral: false
+      kubePrometheusNodeRecording: false
+      kubernetesApps: false
+      kubernetesResources: false
+      kubernetesStorage: false
+      kubernetesSystem: false
+      kubeSchedulerAlerting: false
+      kubeSchedulerRecording: false
       kubeStateMetrics: true
       network: true
       node: true
-      nodeExporterAlerting: true
-      nodeExporterRecording: true
-      prometheus: true
-      prometheusOperator: true
+      nodeExporterAlerting: false
+      nodeExporterRecording: false
+      prometheus: false
+      prometheusOperator: false
       windows: false
     labels:
       grafana_alert: "1"
