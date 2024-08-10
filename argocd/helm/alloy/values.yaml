@@ -256,14 +256,14 @@ alloy:
         protocol: "TCP"
 
     clustering:
-      enabled: true
+      enabled: false
 
     # -- Enables sending Grafana Labs anonymous usage stats to help improve Grafana
     enableReporting: false
 
   controller:
     type: 'statefulset'
-    replicas: 2
+    replicas: 1
     podLabels:
       cluster: "lgtm-kind"
     autoscaling:
