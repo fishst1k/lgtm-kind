@@ -267,8 +267,8 @@ alloy:
     podLabels:
       cluster: "lgtm-kind"
     autoscaling:
-      enabled: true
-      minReplicas: 2
+      enabled: false
+      minReplicas: 1
       maxReplicas: 8
     enableStatefulSetAutoDeletePVC: true
     volumeClaimTemplates:
