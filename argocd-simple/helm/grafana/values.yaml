@@ -1,91 +1,90 @@
 grafana:
-  grafana:
-    enabled: true
-    adminPassword: admin
+  enabled: true
+  adminPassword: admin
 
-    sidecar:
-      dashboards:
-        enabled: true
-        searchNamespace: ALL
-      alerts:
-        enabled: true
-        searchNamespace: ALL
-      datasources:
-        enabled: true
-        defaultDatasourceEnabled: true
-        isDefaultDatasource: false
-
+  sidecar:
+    dashboards:
+      enabled: true
+      searchNamespace: ALL
+    alerts:
+      enabled: true
+      searchNamespace: ALL
     datasources:
-      datasources.yaml:
-        apiVersion: 1
-        datasources:
-          - name: Mimir
-            type: prometheus
-            uid: lgtm-mimir
-            url: http://mimir-gateway.mimir.svc.cluster.local:8080/prometheus
-            editable: true
-            isDefault: true
-            orgId: 1
-            jsonData:
-              httpHeaderName1: "X-Scope-OrgID"
-            secureJsonData:
-              httpHeaderValue1: "lgtm-kind"
-          - name: Loki
-            type: loki
-            uid: "lgtm-loki"
-            url: http://loki-gateway.loki.svc.cluster.local
-            editable: true
-            orgId: 1
-            jsonData:
-              httpHeaderName1: "X-Scope-OrgId"
-            secureJsonData:
-              httpHeaderValue1: "lgtm-kind"
-          - name: Tempo
-            type: tempo
-            url: http://tempo.tempo.svc.cluster.local:16686
-            editable: true
-            orgId: 1
-            uid: "lgtm-tempo"
-            jsonData:
-              httpHeaderName1: X-Scope-OrgId
-              tracesToLogsV2:
-                datasourceUid: "lgtm-loki"
-                spanStartTimeShift: 1h
-                spanEndTimeShift: -1h
-                tags:
-                  - job
-                  - instance
-                  - pod
-                  - namespace
-                filterByTraceID: 'False'
-                filterBySpanID: 'False'
-                customQuery: 'True'
-                query: method='${__span.tags.method}'
-              tracesToMetrics:
-                datasourceUid: "lgtm-mimir"
-                spanStartTimeShift: 1h
-                spanEndTimeShift: -1h
-                tags:
-                  - key: service.name
-                    value: service
-                  - key: job
-                queries:
-                  - name: Sample query
-                    query: sum(rate(traces_spanmetrics_latency_bucket{$$__tags}[5m]))
-              serviceMap:
-                datasourceUid: "lgtm-mimir"
-              nodeGraph:
-                enabled: 'True'
-              search:
-                hide: 'False'
-              lokiSearch:
-                datasourceUid: "lgtm-loki"
-              traceQuery:
-                timeShiftEnabled: 'True'
-                spanStartTimeShift: 1h
-                spanEndTimeShift: -1h
-              spanBar:
-                type: Tag
-                tag: http.path
-            secureJsonData:
-              httpHeaderValue1: "lgtm-kind"
+      enabled: true
+      defaultDatasourceEnabled: true
+      isDefaultDatasource: false
+
+  datasources:
+    datasources.yaml:
+      apiVersion: 1
+      datasources:
+        - name: Mimir
+          type: prometheus
+          uid: lgtm-mimir
+          url: http://mimir-gateway.mimir.svc.cluster.local:8080/prometheus
+          editable: true
+          isDefault: true
+          orgId: 1
+          jsonData:
+            httpHeaderName1: "X-Scope-OrgID"
+          secureJsonData:
+            httpHeaderValue1: "lgtm-kind"
+        - name: Loki
+          type: loki
+          uid: "lgtm-loki"
+          url: http://loki-gateway.loki.svc.cluster.local
+          editable: true
+          orgId: 1
+          jsonData:
+            httpHeaderName1: "X-Scope-OrgId"
+          secureJsonData:
+            httpHeaderValue1: "lgtm-kind"
+        - name: Tempo
+          type: tempo
+          url: http://tempo.tempo.svc.cluster.local:16686
+          editable: true
+          orgId: 1
+          uid: "lgtm-tempo"
+          jsonData:
+            httpHeaderName1: X-Scope-OrgId
+            tracesToLogsV2:
+              datasourceUid: "lgtm-loki"
+              spanStartTimeShift: 1h
+              spanEndTimeShift: -1h
+              tags:
+                - job
+                - instance
+                - pod
+                - namespace
+              filterByTraceID: 'False'
+              filterBySpanID: 'False'
+              customQuery: 'True'
+              query: method='${__span.tags.method}'
+            tracesToMetrics:
+              datasourceUid: "lgtm-mimir"
+              spanStartTimeShift: 1h
+              spanEndTimeShift: -1h
+              tags:
+                - key: service.name
+                  value: service
+                - key: job
+              queries:
+                - name: Sample query
+                  query: sum(rate(traces_spanmetrics_latency_bucket{$$__tags}[5m]))
+            serviceMap:
+              datasourceUid: "lgtm-mimir"
+            nodeGraph:
+              enabled: 'True'
+            search:
+              hide: 'False'
+            lokiSearch:
+              datasourceUid: "lgtm-loki"
+            traceQuery:
+              timeShiftEnabled: 'True'
+              spanStartTimeShift: 1h
+              spanEndTimeShift: -1h
+            spanBar:
+              type: Tag
+              tag: http.path
+          secureJsonData:
+            httpHeaderValue1: "lgtm-kind"
