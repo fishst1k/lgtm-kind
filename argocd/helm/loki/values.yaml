@@ -53,6 +53,14 @@ loki:
   minio:
     enabled: true
 
+  # -- DEPRECATED Monitoring section determines which monitoring features to enable, this section is being replaced
+  # by https://github.com/grafana/meta-monitoring-chart
+  monitoring:
+    # Dashboards for monitoring Loki
+    dashboards:
+      # -- If enabled, create configmap with dashboards for monitoring Loki
+      enabled: true
+
   # Zero out replica counts of other deployment modes
   backend:
     replicas: 0
