@@ -11,7 +11,7 @@ spec:
   source:
     repoURL: https://github.com/fishst1k/lgtm-kind.git
     targetRevision: master
-    path: argocd/helm/mimir
+    path: argocd-simple/helm/mimir
     helm:
       valueFiles:
         - values.yaml

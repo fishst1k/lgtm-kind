@@ -11,7 +11,7 @@ spec:
   source:
     repoURL: https://github.com/fishst1k/lgtm-kind.git
     targetRevision: master
-    path: argocd/helm/k8s-monitoring
+    path: argocd-simple/helm/k8s-monitoring
     helm:
       valueFiles:
         - values.yaml

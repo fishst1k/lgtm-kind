@@ -11,7 +11,7 @@ spec:
   source:
     repoURL: https://github.com/fishst1k/lgtm-kind.git
     targetRevision: master
-    path: argocd/helm/tempo
+    path: argocd-simple/helm/tempo
     helm:
       valueFiles:
         - values.yaml
