@@ -6,8 +6,8 @@ k8s-monitoring:
 
   externalServices:
     prometheus:
-      host: "http://mimir-gateway.mimir.svc.cluster.local:8080"
-      writeEndpoint: /prometheus
+      host: "http://mimir-gateway.mimir.svc.cluster.local"
+      writeEndpoint: /api/v1/push
       protocol: "remote_write"
       tenantId: "lgtm-kind"
       authMode: none
