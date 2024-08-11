@@ -1,0 +1,280 @@
+k8s-monitoring:
+  # Cluster settings
+  cluster:
+    name: "lgtm-kind"
+    kubernetesAPIService: kubernetes.default.svc.cluster.local:443
+
+  externalServices:
+    prometheus:
+      host: "mimir-gateway.mimir.svc.cluster.local"
+      protocol: "remote_write"
+      tenantId: "lgtm-kind"
+      authMode: none
+
+    # Connection information for Grafana Loki
+    loki:
+      host: "loki-gateway.loki.svc.cluster.local"
+      tenantId: "lgtm-kind"
+      authMode: none
+
+    tempo:
+      host: "tempo.tempo.svc.cluster.local"
+      tenantId: "lgtm-kind"
+      authMode: none
+
+  # Settings related to capturing and forwarding metrics
+  metrics:
+    enabled: true
+    autoDiscover:
+      enabled: true
+      # Annotations that are used to discover and configure metric scraping targets. Add these annotations
+      # to your services or pods to control how autodiscovery will find and scrape metrics from your service or pod.
+      annotations:
+        # -- Annotation for enabling scraping for this service or pod. Value should be either "true" or "false"
+        # @section -- Metrics Job: Auto-Discovery
+        scrape: "k8s.grafana.com/scrape"
+        # -- Annotation for overriding the job label
+        # @section -- Metrics Job: Auto-Discovery
+        job: "k8s.grafana.com/job"
+        # -- Annotation for overriding the instance label
+        # @section -- Metrics Job: Auto-Discovery
+        instance: "k8s.grafana.com/instance"
+        # -- Annotation for setting or overriding the metrics path. If not set, it defaults to /metrics
+        # @section -- Metrics Job: Auto-Discovery
+        metricsPath: "k8s.grafana.com/metrics.path"
+        # -- Annotation for setting the metrics port by name.
+        # @section -- Metrics Job: Auto-Discovery
+        metricsPortName: "k8s.grafana.com/metrics.portName"
+        # -- Annotation for setting the metrics port by number.
+        # @section -- Metrics Job: Auto-Discovery
+        metricsPortNumber: "k8s.grafana.com/metrics.portNumber"
+        # -- Annotation for setting the metrics scheme, default: http.
+        # @section -- Metrics Job: Auto-Discovery
+        metricsScheme: "k8s.grafana.com/metrics.scheme"
+        # -- Annotation for overriding the scrape interval for this service or pod. Value should be a duration like "15s, 1m".
+        # Overrides metrics.autoDiscover.scrapeInterval
+        # @section -- Metrics Job: Auto-Discovery
+        metricsScrapeInterval: "k8s.grafana.com/metrics.scrapeInterval"
+
+    # Metrics from Grafana Alloy
+    # @section -- Metrics -> Alloy Job
+    alloy:
+      enabled: true
+
+    # Cluster object metrics from Kube State Metrics
+    kube-state-metrics:
+      enabled: true
+
+    node-exporter:
+      enabled: true
+
+      labelMatchers:
+        app.kubernetes.io/name: prometheus-node-exporter.*
+
+    # Cluster metrics from the Kubelet
+    kubelet:
+      enabled: true
+      # -- How to access the node services, either direct (use node IP, requires nodes/metrics) or via proxy (requires nodes/proxy)
+      # @section -- Metrics Job: Kubelet
+      nodeAddressFormat: direct
+
+    # Container metrics from cAdvisor
+    cadvisor:
+      enabled: true
+      # -- How to access the node services, either direct (use node IP, requires nodes/metrics) or via proxy (requires nodes/proxy)
+      # @section -- Metrics Job: cAdvisor
+      nodeAddressFormat: direct
+
+    # Cost related metrics from OpenCost
+    # @section -- Metrics -> OpenCost Job
+    cost:
+      enabled: false
+
+    # Prometheus Operator PodMonitors
+    podMonitors:
+      enabled: true
+      # -- Which namespaces to look for PodMonitor objects.
+      # @section -- Metrics Job: Prometheus Operator (PodMonitors)
+      namespaces: []
+
+      # -- Selector to filter which PodMonitor objects to use.
+      # @section -- Metrics Job: Prometheus Operator (PodMonitors)
+      selector: ""
+
+    # Prometheus Operator Probes
+    probes:
+      # -- Enable discovery of Prometheus Operator Probe objects.
+      # @section -- Metrics Job: Prometheus Operator (Probes)
+      enabled: true
+
+      # -- Which namespaces to look for Probe objects.
+      # @section -- Metrics Job: Prometheus Operator (Probes)
+      namespaces: []
+
+      # -- Selector to filter which Probes objects to use.
+      # @section -- Metrics Job: Prometheus Operator (Probes)
+      selector: ""
+
+    # Prometheus Operator ServiceMonitors
+    serviceMonitors:
+      # -- Enable discovery of Prometheus Operator ServiceMonitor objects.
+      # @section -- Metrics Job: Prometheus Operator (ServiceMonitors)
+      enabled: true
+
+      # -- Which namespaces to look for ServiceMonitor objects.
+      # @section -- Metrics Job: Prometheus Operator (ServiceMonitors)
+      namespaces: []
+
+      # -- Selector to filter which ServiceMonitor objects to use.
+      # @section -- Metrics Job: Prometheus Operator (ServiceMonitors)
+      selector: ""
+
+    kubernetesMonitoring:
+      enabled: true
+
+  # Settings related to capturing and forwarding logs
+  logs:
+    enabled: true
+
+    # Settings for Kubernetes pod logs from the worker
+    pod_logs:
+      enabled: true
+
+      # When set to "all", every pod (filtered by the namespaces list below) will have their logs gathered, but you can
+      # use the annotation to remove a pod from that list.
+      # e.g. Pods with the annotation k8s.grafana.com/logs.autogather: false will not have their logs gathered.
+      # When set to "annotation", only pods with the annotation set to something other than "false", "no" or "skip" will
+      # have their logs gathered.
+      # Possible values: "all" "annotation"
+      # -- Controls the behavior of discovering pods for logs.
+      # @section -- Logs Scrape: Pod Logs
+      discovery: "all"
+
+      # The annotation to control the behavior of gathering logs from this pod. If a pod has this annotation, it will
+      # either enable or disable gathering of logs.
+      # -- Pod annotation to use for controlling log discovery.
+      # @section -- Logs Scrape: Pod Logs
+      annotation: "k8s.grafana.com/logs.autogather"
+
+    # Settings for scraping Kubernetes cluster events
+    cluster_events:
+      enabled: true
+
+      # -- Log format used to forward cluster events. Allowed values: `logfmt` (default), `json`.
+      # @section -- Logs Scrape: Cluster Events
+      logFormat: "logfmt"
+
+      # -- List of namespaces to watch for events (`[]` means all namespaces)
+      # @section -- Logs Scrape: Cluster Events
+      namespaces: []
+
+  # Settings related to capturing and forwarding traces
+  traces:
+    enabled: false
+
+  # Telemetry data receiver settings
+  receivers:
+    grpc:
+      # -- Receive OpenTelemetry signals over OTLP/gRPC?
+      # @section -- OTEL Receivers (gRPC)
+      enabled: true
+
+      # -- Which port to use for the OTLP/gRPC receiver. This port needs to be opened in the alloy section below.
+      # @section -- OTEL Receivers (gRPC)
+      port: 4317
+
+      # -- [TLS settings](https://grafana.com/docs/alloy/latest/reference/components/otelcol.receiver.otlp/#tls-block) to configure for the OTLP/gRPC receiver.
+      # @section -- OTEL Receivers (gRPC)
+      tls: {}
+
+      # -- It removes attributes which could cause high cardinality metrics. For example, attributes with IP addresses and port numbers in metrics about HTTP and gRPC connections will be removed.
+      # @section -- OTEL Receivers (gRPC)
+      disable_debug_metrics: true
+
+    http:
+      # -- Receive OpenTelemetry signals over OTLP/HTTP?
+      # @section -- OTEL Receivers (HTTP)
+      enabled: true
+
+      # -- Which port to use for the OTLP/HTTP receiver. This port needs to be opened in the alloy section below.
+      # @section -- OTEL Receivers (HTTP)
+      port: 4318
+
+      # -- [TLS settings](https://grafana.com/docs/alloy/latest/reference/components/otelcol.receiver.otlp/#tls-block) to configure for the OTLP/HTTP receiver.
+      # @section -- OTEL Receivers (HTTP)
+      tls: {}
+
+      # -- It removes attributes which could cause high cardinality metrics. For example, attributes with IP addresses and port numbers in metrics about HTTP and gRPC connections will be removed.
+      # @section -- OTEL Receivers (HTTP)
+      disable_debug_metrics: true
+
+    grafanaCloudMetrics:
+      enabled: false
+
+    # -- Deploy a service named for Grafana Agent that matches the Alloy service. This is useful for applications that are
+    # configured to send telemetry to a service named "grafana-agent" and not yet updated to send to "alloy".
+    # @section -- OTEL Receivers
+    deployGrafanaAgentService: true
+
+  # Setting for the config validator job, run as a pre-install and pre-upgrade hook to validate that the generated
+  # configuration, including extraConfig settings are valid.
+  configValidator:
+    enabled: true
+
+    # -- nodeSelector to apply to the config validator job.
+    # @section -- Config Validator Job
+    nodeSelector:
+      kubernetes.io/os: linux
+
+  # Settings for the test job, which runs queries against Prometheus, Loki, and/or Tempo to check for data that should be
+  # available based on the current configuration. Runnable by "helm test"
+  test:
+    enabled: true
+
+  # Settings for the config analysis pod, which asks Grafana Alloy for an analysis of expected metric discoveries and
+  # scrapes. Runnable by "helm test"
+  configAnalysis:
+    enabled: true
+
+  # Settings for the Kube State Metrics deployment
+  # You can use this sections to make modifications to the Kube State Metrics deployment.
+  # See https://github.com/prometheus-community/helm-charts/tree/main/charts/kube-state-metrics for available values.
+  kube-state-metrics:
+    # -- Should this helm chart deploy Kube State Metrics to the cluster.
+    # Set this to false if your cluster already has Kube State Metrics, or if you
+    # do not want to scrape metrics from Kube State Metrics.
+    # @section -- Deployment: [Kube State Metrics](https://github.com/prometheus-community/helm-charts/tree/main/charts/kube-state-metrics)
+    enabled: true
+    # @ignored
+    nodeSelector:
+      kubernetes.io/os: linux
+
+  # Settings for the Node Exporter deployment
+  # You can use this sections to make modifications to the Node Exporter deployment.
+  # See https://github.com/prometheus-community/helm-charts/tree/main/charts/prometheus-node-exporter for available values.
+  prometheus-node-exporter:
+    # -- Should this helm chart deploy Node Exporter to the cluster.
+    # Set this to false if your cluster already has Node Exporter, or if you do
+    # not want to scrape metrics from Node Exporter.
+    # @section -- Deployment: [Prometheus Node Exporter](https://github.com/prometheus-community/helm-charts/tree/main/charts/prometheus-node-exporter)
+    enabled: true
+    # @ignored - Only select Linux nodes
+    nodeSelector:
+      kubernetes.io/os: linux
+
+  # Settings for the Prometheus Operator CRD deployment
+  # You can use this sections to make modifications to the Prometheus Operator CRD deployment.
+  # See https://github.com/prometheus-community/helm-charts/tree/main/charts/prometheus-operator-crds for available values.
+  prometheus-operator-crds:
+    # -- Should this helm chart deploy the Prometheus Operator CRDs to the cluster.
+    # Set this to false if your cluster already has the CRDs, or if you do not
+    # to have Grafana Alloy scrape metrics from PodMonitors, Probes, or ServiceMonitors.
+    # @section -- Deployment: [Prometheus Operator CRDs](https://github.com/prometheus-community/helm-charts/tree/main/charts/prometheus-operator-crds)
+    enabled: true
+
+  # Settings for the OpenCost deployment
+  # You can use this sections to make modifications to the OpenCost deployment.
+  # See https://github.com/opencost/opencost-helm-chart for available values.
+  # @section -- Deployment: [OpenCost](https://github.com/opencost/opencost-helm-chart)
+  opencost:
+    enabled: false

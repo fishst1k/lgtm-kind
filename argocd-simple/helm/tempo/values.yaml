@@ -1,0 +1,74 @@
+tempo:
+  # -- Overrides the chart's name
+  nameOverride: ""
+
+  # -- Overrides the chart's computed fullname
+  fullnameOverride: ""
+
+  # -- Define the amount of instances
+  replicas: 1
+
+  # -- Number of old history to retain to allow rollback (If not set, default Kubernetes value is set to 10)
+  # revisionHistoryLimit: 1
+
+  # -- Annotations for the StatefulSet
+  annotations: {}
+
+  tempo:
+    multitenancyEnabled: true
+    resources:
+      requests:
+        cpu: 500m
+        memory: 1Gi
+      limits:
+        cpu: 1000m
+        memory: 2Gi
+
+  # -- Tempo configuration file contents
+  # @default -- Dynamically generated tempo configmap
+  config: |
+    multitenancy_enabled: {{ .Values.tempo.multitenancyEnabled }}
+    usage_report:
+      reporting_enabled: {{ .Values.tempo.reportingEnabled }}
+    compactor:
+      compaction:
+        block_retention: {{ .Values.tempo.retention }}
+    distributor:
+      receivers:
+        {{- toYaml .Values.tempo.receivers | nindent 8 }}
+    ingester:
+      {{- toYaml .Values.tempo.ingester | nindent 6 }}
+    server:
+      {{- toYaml .Values.tempo.server | nindent 6 }}
+    storage:
+      {{- toYaml .Values.tempo.storage | nindent 6 }}
+    querier:
+      {{- toYaml .Values.tempo.querier | nindent 6 }}
+    query_frontend:
+      {{- toYaml .Values.tempo.queryFrontend | nindent 6 }}
+    overrides:
+      {{- toYaml .Values.tempo.global_overrides | nindent 6 }}
+      {{- if .Values.tempo.metricsGenerator.enabled }}
+          metrics_generator_processors:
+          - 'service-graphs'
+          - 'span-metrics'
+    metrics_generator:
+          storage:
+            path: "/tmp/tempo"
+            remote_write:
+              - url: {{ .Values.tempo.metricsGenerator.remoteWriteUrl }}
+      {{- end }}
+
+  tempoQuery:
+    enabled: true
+
+  # -- securityContext for container
+  securityContext: {}
+
+  serviceAccount:
+    # -- Specifies whether a ServiceAccount should be created
+    create: true
+    automountServiceAccountToken: true
+
+  serviceMonitor:
+    enabled: true

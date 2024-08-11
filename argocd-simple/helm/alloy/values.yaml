@@ -1,0 +1,287 @@
+alloy:
+  alloy:
+    mode: 'flow'
+    resources:
+      limits:
+        cpu: 1
+        memory: 1024Mi
+      requests:
+        cpu: .5
+        memory: 512Mi
+    configMap:
+      create: true
+      content: |+
+        logging {
+          level    = "info"
+          format   = "logfmt"
+          write_to = [loki.write.lgtm.receiver]
+        }
+
+        prometheus.exporter.self "default" {
+        }
+
+        prometheus.scrape "self" {
+          targets    = prometheus.exporter.self.default.targets
+          forward_to = [prometheus.remote_write.lgtm.receiver]
+        }
+
+        discovery.kubernetes "pods" {
+          role = "pod"
+        }
+
+        discovery.relabel "pods" {
+          targets = discovery.kubernetes.pods.targets
+
+          rule {
+            source_labels = [
+              "__meta_kubernetes_pod_label_app_kubernetes_io_instance",
+              "__meta_kubernetes_pod_label_app_kubernetes_io_name",
+            ]
+            target_label = "__helm_name__"
+            separator    = "-"
+            regex        = "(.+-.+)"
+          }
+
+          rule {
+            // Try to identify a service name to eventually form the job label. We'll
+            // prefer the first of the below labels, in descending order.
+            source_labels = [
+              "__meta_kubernetes_pod_label_k8s_app",
+              "__meta_kubernetes_pod_label_app",
+              "__meta_kubernetes_pod_label_name",
+              "__helm_name__",
+              "__meta_kubernetes_pod_controller_name",
+              "__meta_kubernetes_pod_name",
+            ]
+            target_label = "__service__"
+
+            // Our in-memory string will be something like A;B;C;D;E;F, where any of the
+            // letters could be replaced with a label value or be empty if the label
+            // value did not exist.
+            //
+            // We want to match for the very first sequence of non-semicolon characters
+            // which is either prefaced by zero or more semicolons, and is followed by
+            // zero or more semicolons before the rest of the string.
+            //
+            // This is a very annoying way of being able to do conditionals, and
+            // ideally we can use River expressions in the future to make this much
+            // less bizarre.
+            regex = ";*([^;]+);*.*"
+          }
+
+          rule {
+            source_labels = ["__meta_kubernetes_pod_node_name"]
+            target_label  = "__host__"
+          }
+
+          rule {
+            source_labels = [
+              "__meta_kubernetes_namespace",
+              "__service__",
+            ]
+            target_label = "job"
+            separator    = "/"
+          }
+
+          rule {
+            source_labels = ["__meta_kubernetes_namespace"]
+            target_label  = "namespace"
+          }
+
+          rule {
+            source_labels = ["__meta_kubernetes_pod_name"]
+            target_label  = "pod"
+          }
+
+          rule {
+            source_labels = ["__meta_kubernetes_pod_container_name"]
+            target_label  = "container"
+          }
+
+          rule {
+            source_labels = ["__meta_kubernetes_pod_label_app"]
+            target_label  = "app"
+          }
+
+          rule {
+            source_labels = ["__meta_kubernetes_pod_label_app_kubernetes_io_name"]
+            target_label  = "name"
+          }
+        }
+
+        discovery.relabel "metrics_pods" {
+          targets = discovery.relabel.pods.output
+
+          rule {
+            action        = "keep"
+            regex         = ".*-metrics"
+            source_labels = ["__meta_kubernetes_pod_container_port_name"]
+          }
+
+          rule {
+            action        = "drop"
+            regex         = "Succeeded|Failed"
+            source_labels = ["__meta_kubernetes_pod_phase"]
+          }
+
+          rule {
+            action        = "replace"
+            separator     = ":"
+            source_labels = ["__meta_kubernetes_pod_name", "__meta_kubernetes_pod_container_name", "__meta_kubernetes_pod_container_port_name"]
+            target_label  = "instance"
+          }
+        }
+
+        prometheus.scrape "metrics_pods" {
+          targets    = discovery.relabel.metrics_pods.output
+          forward_to = [prometheus.remote_write.lgtm.receiver]
+          clustering {
+            enabled = true
+          }
+        }
+
+        prometheus.remote_write "lgtm" {
+          // Send metrics to a locally running Mimir.
+          endpoint {
+            url     = "http://mimir-gateway.mimir.svc.cluster.local/api/v1/push"
+            headers = {
+              "X-Scope-OrgID" = "lgtm-kind",
+            }
+          }
+          external_labels = {
+            "cluster" = "lgtm-kind",
+          }
+        }
+
+        prometheus.operator.servicemonitors "services" {
+          clustering {
+            enabled = true
+          }
+          forward_to = [prometheus.remote_write.lgtm.receiver]
+        }
+
+        loki.write "lgtm" {
+          endpoint {
+            url       = "http://loki-gateway.loki.svc.cluster.local/loki/api/v1/push"
+            tenant_id = "lgtm-kind"
+          }
+          external_labels = {
+            "cluster" = "lgtm-kind",
+          }
+        }
+
+        loki.source.kubernetes_events "all" {
+          forward_to = [loki.write.lgtm.receiver]
+        }
+
+        loki.source.kubernetes "pods" {
+          targets    = discovery.relabel.pods.output
+          forward_to = [loki.write.lgtm.receiver]
+          clustering {
+            enabled = true
+          }
+        }
+
+        otelcol.receiver.otlp "lgtm_kind" {
+          // https://grafana.com/docs/agent/latest/flow/reference/components/otelcol.receiver.otlp/
+
+          // configures the default endpoint "0.0.0.0:4317"
+          grpc { }
+          // configures the default endpoint "0.0.0.0:4318"
+          http { }
+
+          output {
+            metrics = [otelcol.processor.memory_limiter.lgtm_kind.input]
+            logs    = [otelcol.processor.memory_limiter.lgtm_kind.input]
+            traces  = [otelcol.processor.memory_limiter.lgtm_kind.input]
+          }
+        }
+
+        otelcol.processor.memory_limiter "lgtm_kind" {
+          // https://grafana.com/docs/agent/latest/flow/reference/components/otelcol.processor.memory_limiter/
+          check_interval = "1s"
+
+          limit = "512MiB" // alternatively, set `limit_percentage` and `spike_limit_percentage`
+
+          output {
+            metrics = [otelcol.processor.batch.lgtm_kind.input]
+            logs    = [otelcol.processor.batch.lgtm_kind.input]
+            traces  = [otelcol.processor.batch.lgtm_kind.input]
+          }
+        }
+
+        // otelcol.processor.batch must run after components which can drop telemetry (e.g. otelcol.processor.memory_limiter).
+        // Otherwise, if telemetry is dropped, the effect of batching will be lost.
+        otelcol.processor.batch "lgtm_kind" {
+          // https://grafana.com/docs/agent/latest/flow/reference/components/otelcol.processor.batch/
+          output {
+            metrics = [otelcol.exporter.prometheus.lgtm_kind.input]
+            logs    = [otelcol.exporter.loki.lgtm_kind.input]
+            traces  = [otelcol.exporter.otlp.lgtm_kind.input]
+          }
+        }
+
+        otelcol.exporter.otlp "lgtm_kind" {
+          client {
+              endpoint = "http://tempo.tempo.svc.cluster.local:4317"
+              tls {
+                  insecure             = true
+                  insecure_skip_verify = true
+              }
+              headers = {
+               "X-Scope-OrgID"="lgtm-kind",
+              }
+          }
+        }
+
+        otelcol.exporter.loki "lgtm_kind" {
+          // https://grafana.com/docs/agent/latest/flow/reference/components/otelcol.exporter.loki/
+          forward_to = [loki.write.lgtm.receiver]
+        }
+
+        otelcol.exporter.prometheus "lgtm_kind" {
+          // https://grafana.com/docs/agent/latest/flow/reference/components/otelcol.exporter.prometheus/
+          forward_to = [prometheus.remote_write.lgtm.receiver]
+        }
+
+    # -- Extra ports to expose on the Agent
+    extraPorts:
+      - name: "otlp-grpc"
+        port: 4317
+        targetPort: 4317
+        protocol: "TCP"
+      - name: "otlp-http"
+        port: 4318
+        targetPort: 4318
+        protocol: "TCP"
+
+    clustering:
+      enabled: false
+
+    # -- Enables sending Grafana Labs anonymous usage stats to help improve Grafana
+    enableReporting: false
+
+  controller:
+    type: 'statefulset'
+    replicas: 1
+    podLabels:
+      cluster: "lgtm-kind"
+    autoscaling:
+      enabled: false
+      minReplicas: 1
+      maxReplicas: 8
+    enableStatefulSetAutoDeletePVC: true
+    volumeClaimTemplates:
+      - metadata:
+          name: alloy-wal-fs
+        spec:
+          accessModes: [ "ReadWriteOnce" ]
+          resources:
+            requests:
+              storage: 512Mi
+
+  service:
+    enabled: true
+  serviceMonitor:
+    enabled: true
+
