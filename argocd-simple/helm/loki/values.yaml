@@ -59,7 +59,7 @@ loki:
     # Dashboards for monitoring Loki
     dashboards:
       # -- If enabled, create configmap with dashboards for monitoring Loki
-      enabled: false
+      enabled: true
 
   # Zero out replica counts of other deployment modes
   backend:
