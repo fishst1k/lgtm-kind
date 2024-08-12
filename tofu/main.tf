@@ -180,7 +180,7 @@ resource "helm_release" "argocd_apps" {
           source = {
             repoURL = "https://github.com/fishst1k/lgtm-kind.git"
             targetRevision = "HEAD"
-            path = "argocd"
+            path = "argocd/applications"
             directory = {
               recurse = true
             }
