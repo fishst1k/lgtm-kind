@@ -3,8 +3,6 @@ kind: Application
 metadata:
   name: kube-prometheus-stack
   namespace: argocd
-  annotations:
-    argocd.argoproj.io/sync-wave: "2"
 spec:
   destination:
     namespace: grafana
@@ -21,3 +19,4 @@ spec:
     automated: {}
     syncOptions:
       - CreateNamespace=true
+      - ServerSideApply=true
