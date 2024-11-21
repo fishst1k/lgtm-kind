@@ -143,7 +143,7 @@ resource "helm_release" "argocd" {
   repository       = "https://argoproj.github.io/argo-helm"
   chart            = "argo-cd"
   namespace        = "argocd"
-  version          = "7.0.0"
+  version          = "7.4.2"
   create_namespace = true
 
   values = [
@@ -152,6 +152,7 @@ resource "helm_release" "argocd" {
         params = {
           "server.insecure" = "true"
           "server.disable.auth" = true
+          "applicationsetcontroller.enable.progressive.syncs" = true
         }
       }
     })
@@ -180,7 +181,7 @@ resource "helm_release" "argocd_apps" {
           source = {
             repoURL = "https://github.com/fishst1k/lgtm-kind.git"
             targetRevision = "HEAD"
-            path = "argocd/applications"
+            path = "argocd"
             directory = {
               recurse = true
             }
