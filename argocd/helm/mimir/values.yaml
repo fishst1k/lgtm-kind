@@ -1,6 +1,6 @@
 mimir-distributed:
   alertmanager:
-    enabled: false
+    enabled: true
     replicas: 1
 
   distributor:
